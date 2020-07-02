@@ -8,15 +8,7 @@ import datetime
 from mongoengine import *
 from celery import current_app
 import celery.schedules
-
-
-def get_periodic_task_collection():
-    if hasattr(current_app.conf, "mongodb_scheduler_collection"):
-        return current_app.conf.get("mongodb_scheduler_collection")
-    elif hasattr(current_app.conf, "CELERY_MONGODB_SCHEDULER_COLLECTION"):
-        return current_app.conf.CELERY_MONGODB_SCHEDULER_COLLECTION
-    return "schedules"
-
+from . import conf
 
 #: Authorized values for PeriodicTask.Interval.period
 PERIODS = ('days', 'hours', 'minutes', 'seconds', 'microseconds')
@@ -25,8 +17,11 @@ PERIODS = ('days', 'hours', 'minutes', 'seconds', 'microseconds')
 class PeriodicTask(DynamicDocument):
     """MongoDB model that represents a periodic task"""
 
-    meta = {'collection': get_periodic_task_collection(),
-            'allow_inheritance': True}
+    meta = {
+        'collection': conf.get_periodic_task_collection(),
+        'allow_inheritance': True,
+        'db_alias': conf.get_db_alias()
+    }
 
     class Interval(EmbeddedDocument):
         """Schedule executing on a regular interval.

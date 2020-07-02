@@ -14,6 +14,7 @@ from celery.beat import Scheduler, ScheduleEntry
 from celery.utils.log import get_logger
 from celery import current_app
 
+from . import conf
 
 logger = get_logger(__name__)
 
@@ -110,26 +111,10 @@ class MongoScheduler(Scheduler):
     Model = PeriodicTask
 
     def __init__(self, *args, **kwargs):
-        if hasattr(current_app.conf, "mongodb_scheduler_db"):
-            db = current_app.conf.get("mongodb_scheduler_db")
-        elif hasattr(current_app.conf, "CELERY_MONGODB_SCHEDULER_DB"):
-            db = current_app.conf.CELERY_MONGODB_SCHEDULER_DB
-        else:
-            db = "celery"
 
-        if hasattr(current_app.conf, "mongodb_scheduler_connection_alias"):
-            alias = current_app.conf.get('mongodb_scheduler_connection_alias')
-        elif hasattr(current_app.conf, "CELERY_MONGODB_SCHEDULER_CONNECTION_ALIAS"):
-            alias = current_app.conf.CELERY_MONGODB_SCHEDULER_CONNECTION_ALIAS
-        else:
-            alias = "default"
-
-        if hasattr(current_app.conf, "mongodb_scheduler_url"):
-            host = current_app.conf.get('mongodb_scheduler_url')
-        elif hasattr(current_app.conf, "CELERY_MONGODB_SCHEDULER_URL"):
-            host = current_app.conf.CELERY_MONGODB_SCHEDULER_URL
-        else:
-            host = None
+        db = conf.get_db_name()
+        alias = conf.get_db_alias()
+        host = conf.get_host()
 
         self._mongo = mongoengine.connect(db, host=host, alias=alias)
 
