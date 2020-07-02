@@ -1,3 +1,4 @@
+import mongoengine.connection
 from celery import current_app
 
 
@@ -37,3 +38,11 @@ def get_host():
     else:
         host = None
     return host
+
+
+def is_connected():
+    try:
+        mongoengine.connection.get_connection(get_db_alias())
+        return True
+    except mongoengine.connection.MongoEngineConnectionError:
+        return False
