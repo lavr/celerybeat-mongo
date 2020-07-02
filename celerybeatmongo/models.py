@@ -133,3 +133,12 @@ class PeriodicTask(DynamicDocument):
         else:
             raise Exception("must define interval or crontab schedule")
         return fmt.format(self)
+
+    def _get_mongo_id(self):
+        for o in PeriodicTask.objects(name=self.name):
+            return o.id
+
+    def save(self, update=False):
+        if update and not self.id:
+            self.id = self._get_mongo_id()
+        super(PeriodicTask, self).save()
